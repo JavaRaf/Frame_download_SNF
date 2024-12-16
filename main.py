@@ -18,12 +18,12 @@ def main():
     
     comments_list: list[dict] = get_comments()
     remove_replyed_ids(comments_list) # remove comments with id in replyed_ids.txt
-
-
-    for comment in comments_list:
-        finder_commands(comment)
-        get_img(comment)
-        response(comment)
+    
+    if comments_list is not None:
+        for comment in comments_list:
+            finder_commands(comment)
+            get_img(comment)
+            response(comment)
         
         
 
