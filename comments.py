@@ -24,7 +24,8 @@ def get_comments() -> list:
                     if len(comments_data) >= 1:
                         for comment in comments_data:
                             if 'id' in comment:
-                                comments_list.append({'comment': comment['message'], 'id': comment['id']})
+                                if not comment['message'].startswith('Random Crop.') or not comment['message'].startswith('Subtitles:'):
+                                    comments_list.append({'comment': comment['message'], 'id': comment['id']})
                 
                 # Check for pagination
                 if response_data.get('paging') and response_data['paging'].get('next'):
