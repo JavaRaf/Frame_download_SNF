@@ -39,6 +39,7 @@ def get_comments() -> list[dict]:
 
     except httpx.RequestError as e:
         print(f"Error: {e}")
+        return []
 
     print("Number of comments:", len(comments_list))
     return comments_list
