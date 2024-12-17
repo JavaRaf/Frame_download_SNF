@@ -4,44 +4,64 @@ import os
 import data
 
 
+
+def get_messages_and_ids(response_data) -> list[dict]:
+
+    messages_and_ids: list[dict] = []
+    filter = ['Random Crop.', 'Subtitles:']
+
+    for item in response_data:
+        comment_data = item.get('comments', {}).get('data', [])
+        for comment in comment_data:
+            created_time = comment.get('created_time')
+            person_name = comment.get('from', {}).get('name')
+            person_id = comment.get('from', {}).get('id')
+            comment_id = comment.get('id')
+            message = comment.get('message')
+
+            if comment_id and message:
+                if not any(message.startswith(f) for f in filter):
+                    messages_and_ids.append({
+                        'comment': message,
+                        'id': comment_id,
+                        'created_time': created_time,
+                        'person_name': person_name,
+                        'person_id': person_id
+                    })
+
+    return messages_and_ids
+
 def get_comments() -> list[dict]:
-    """Returns a list[dict] of messages and ids"""
+    """Returns a list[dict] of comments from the specified Facebook page"""
 
-    retries     = 0
-    max_retries = 5
-    comments_list: list[dict] = [] 
-    filter = ['Random Crop.','Subtitles:']
-    comments_params = {'fields': 'comments.limit(100)', 'limit': '100', 'access_token': data.FB_TOKEN}
+    retries, max_retries, messages_and_ids = 0, 5, []
+    params = {'fields': 'comments.limit(100)', 'limit': '100', 'access_token': data.FB_TOKEN}
 
-    try:
-        while retries < max_retries:
-            response = httpx.get(f'{data.fb_url}/{os.environ.get("PAGE_ID")}/posts', params=comments_params, timeout=15)
+    while retries < max_retries:
+        try:
+            response = httpx.get(f'{data.fb_url}/{os.environ.get("PAGE_ID")}/posts', params=params, timeout=15)
+
             if response.status_code == 200:
-                response_data = response.json()
-                for item in response_data['data']:
-                    comment_data = item.get('comments', {}).get('data', [])
-                    for comment in comment_data:
-                        id, message = comment.get('id'), comment.get('message')
-                        if id and message and not any(message.startswith(f) for f in filter):
-                            comments_list.append({'comment': message, 'id': id})
-                            
-                # Check for pagination
-                if response_data.get('paging') and response_data['paging'].get('next'):
-                        after = response_data['paging']['cursors'].get('after', '')
-                        comments_params['after'] = after
-                        retries += 1 
+                response_json = response.json()
+                response_data = response_json.get('data', [])
+                messages_and_ids.extend(get_messages_and_ids(response_data))
+
+                # Verificar se há próxima página
+                paging = response_json.get('paging', {})
+                if 'next' in paging:
+                    after = paging['cursors']['after']
+                    params['after'] = after
                 else:
-                    break
-            else:
-                print(f"Error: {response.status_code} {response.content}")
-                retries += 1
-                time.sleep(3)
+                    break  # Sai do loop se não houver próxima página
 
-    except httpx.RequestError as e:
-        print(f"Error: {e}")
-        return []
+            time.sleep(3)
+            retries += 1
 
-    print("Number of comments:", len(comments_list))
-    return comments_list
+        except httpx.RequestError as e:
+            print(f"Error: {e}")
+            time.sleep(3)
+            retries += 1
+    print('len(messages_and_ids)', len(messages_and_ids))
+    return messages_and_ids
 
 
