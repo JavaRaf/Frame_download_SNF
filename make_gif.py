@@ -80,7 +80,7 @@ async def make_gif(comment: dict) -> None:
             # command to create gif
             commands = [
                 image_magick_command,
-                '-delay', '30',
+                '-delay', '25',
                 '-loop', '0',
                 f'{file_path}/frame*.jpg',
                 '-colors', '32',

@@ -49,9 +49,13 @@ async def img_fetch(comment: dict) -> None:
     elif user.str_command_gif in comment['comment'].lower():
         async with httpx.AsyncClient() as session:
             tasks = []
-            start_frame = int(comment['frame_number'])
-            end_frame = start_frame + 30 # Tamanho do gif = 30 frames
-
+            if int(comment['frame_number']) - 15 > 0:
+                start_frame = int(comment['frame_number']) - 10
+                end_frame = int(comment['frame_number']) + 20
+            else:
+                start_frame = 1
+                end_frame = 30
+            
             for frame_number in range(start_frame, end_frame):
                 tasks.append(get_manys_img(session, frame_number, comment['id']))
 
