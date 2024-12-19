@@ -20,7 +20,7 @@ async def upload_gif(comment: dict):
                     dados = {
                         'api_key': data.GIPHY_API_KEY
                     }
-                    response = await client.post(data.giphy_url, files=files, data=dados, timeout=30)
+                    response = await client.post(data.giphy_url, files=files, params=dados, timeout=30)
                     if response.status_code == 200:
                         response_data = response.json()
                         link = 'https://giphy.com/gifs/' + response_data.get("data", {}).get("id", '')
@@ -29,6 +29,9 @@ async def upload_gif(comment: dict):
                         break
                     else:
                         print(f'Erro ao enviar a GIF: {response.status_code}, {response.text}')
+                        print('tentando novamente em 2 segundos...')
+                        await asyncio.sleep(2)
+                        retries += 1
         except Exception as e:
             print(f'Erro ao abrir o arquivo: {e}')
             print('tentando novamente em 2 segundos...')
@@ -83,7 +86,7 @@ async def make_gif(comment: dict) -> None:
                 '-delay', '25',
                 '-loop', '0',
                 f'{file_path}/frame*.jpg',
-                '-colors', '32',
+                '-colors', '128',
                 '-layers', 'optimize',
                 f'{file_path}/animation.gif',
             ]
