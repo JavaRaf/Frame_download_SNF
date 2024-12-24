@@ -56,7 +56,7 @@ def publish_fb(comment: dict) -> None:
             if comment.get('message') and comment['message'].startswith('Helper'):
                 message = comment['message'] + f'{user.message_response_helper.format(LINK_GIF=comment["link"])}'
             else:
-                message = f'{user.message_response_gif_download.format(LINK=comment["link"])}'
+                message = f'{user.message_response_gif_download.format(FRAME_START=comment["frame_start"], FRAME_END=comment["frame_end"], LINK=comment["link"])}'
 
         dados = {
             'message': message,

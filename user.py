@@ -6,9 +6,20 @@ FRAMES_FOLDER: str =  'frames' # directory where frames are saved
 
 
 # response messages
-message_response_frame_download: str = 'Filename: Frame {FRAME}\n\nResolution: 1920x1080\nDownload Link: {LINK}'
+message_response_frame_download: str = (
+    'Filename: Frame {FRAME}'
+    '\n\n'
+    'Resolution: 1920x1080\n'
+    'Download Link: {LINK}'
+)
 
-message_response_gif_download: str = 'Filename: Animation\n\nFormat: GIF\nDownload Link: {LINK}'
+message_response_gif_download: str = (
+    'Used Frames: Start: {FRAME_START} -> End: {FRAME_END}'
+    '\n\n'
+    'Format: gif'
+    '\n'
+    'Link: {LINK}'
+)
 
 # resposta ao pedido de download 
 message_response_helper: str = (

@@ -55,7 +55,7 @@ def ordenar_frames(file_path: str) -> None:
 # resize images to create gif small
 async def resize_images(image_files: list, resize_image_command_base: list):
     """Função assíncrona para redimensionar imagens"""
-    resize_image_command = resize_image_command_base + ['-resize', '30%'] + image_files
+    resize_image_command = resize_image_command_base + ['-resize', '50%'] + image_files
     try:
         process = await asyncio.create_subprocess_exec(*resize_image_command)
         await process.communicate()
@@ -83,11 +83,9 @@ async def make_gif(comment: dict) -> None:
             # command to create gif
             commands = [
                 image_magick_command,
-                '-delay', '25',
+                '-delay', '20',
                 '-loop', '0',
                 f'{file_path}/frame*.jpg',
-                '-colors', '128',
-                '-layers', 'optimize',
                 f'{file_path}/animation.gif',
             ]
 

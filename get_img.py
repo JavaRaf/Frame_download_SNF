@@ -50,11 +50,11 @@ async def img_fetch(comment: dict) -> None:
         async with httpx.AsyncClient() as session:
             tasks = []
             if int(comment['frame_number']) - 15 > 0:
-                start_frame = int(comment['frame_number']) - 10
-                end_frame = int(comment['frame_number']) + 20
+                comment['frame_start'] = start_frame = int(comment['frame_number']) - 10
+                comment['frame_end'] = end_frame = int(comment['frame_number']) + 30
             else:
-                start_frame = 1
-                end_frame = 30
+                comment['frame_start'] = start_frame = 1
+                comment['frame_end'] = end_frame = 30
             
             for frame_number in range(start_frame, end_frame):
                 tasks.append(get_manys_img(session, frame_number, comment['id']))
