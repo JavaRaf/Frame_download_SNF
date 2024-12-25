@@ -69,7 +69,7 @@ async def img_fetch(comment: dict) -> None:
 
 
 def get_img(comment: dict) -> None:
-    if comment.get('comment') and comment.get('id') and comment.get('frame_number'):
+    if comment.get('comment') and comment.get('id') and comment.get('frame_number') and not comment.get('comment').replace(' ', '').lower() == '!vote':
         asyncio.run(img_fetch(comment))
 
 

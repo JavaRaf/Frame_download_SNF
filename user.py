@@ -14,11 +14,12 @@ message_response_frame_download: str = (
 )
 
 message_response_gif_download: str = (
-    'Used Frames: Start: {FRAME_START} -> End: {FRAME_END}'
-    '\n\n'
-    'Format: gif'
-    '\n'
-    'Link: {LINK}'
+    "GIF Download Details:\n"
+    "---------------------\n"
+    "• **Used Frames:**\n"
+    "  Start: {FRAME_START} -> End: {FRAME_END}\n"
+    "• **Format:** gif\n"
+    "• **Link:** {LINK}"
 )
 
 # resposta ao pedido de download 
@@ -33,11 +34,20 @@ message_response_helper: str = (
     "{LINK_GIF}."
 )
 
+message_response_vote: str = (
+    "Vote for the current frame\n"
+    "Total Votes for this frame are: {VOTES}\n"
+    "Thank you for your support!"
+)
+
+
+
 
 # commands
 str_command_download: str =  '!dl'
 str_command_gif: str =       '!gif'
 str_command_help: str =      '!help'
+str_command_vote: str =     '!vote'
 
 
 # frieren anime gifs link, these gifs are used together with the !help command. Change them to your links

@@ -8,9 +8,10 @@ import user
 
 def post_fb(comment: dict) -> None:
 
-    if comment['file_path'].endswith('.gif'):
+    if comment.get('file_path') and comment['file_path'].endswith('.gif') or comment['comment'].replace(' ', '').lower() == user.str_command_vote:
         comment['foto_id'] = ''
         return
+
 
     retries = 0
     while retries < 3:
@@ -48,31 +49,57 @@ def post_fb(comment: dict) -> None:
 
 def publish_fb(comment: dict) -> None:
     retries = 0
+
     while retries < 3:
-
         if comment.get('file_path') and comment['file_path'].endswith('.jpg'):
-            message = f'{user.message_response_frame_download.format(FRAME=comment["frame_number"], LINK=comment["link"])}'
+            # Mensagem para imagem
+            message = user.message_response_frame_download.format(
+                FRAME=comment["frame_number"], 
+                LINK=comment["link"]
+            )
+        
+        elif comment.get('message') and comment['message'].replace(' ', '').startswith('Helper'):
+            # Mensagem para 'Helper'
+            message = comment['message'] + user.message_response_helper.format(
+                LINK_GIF=comment["link"]
+            )
+        
+        elif comment.get('comment') and comment['comment'].replace(' ', '').startswith(user.str_command_vote):
+            # Mensagem para '!vote'
+            message = user.message_response_vote.format(
+                VOTES=comment["vote"]
+            )
+        
         else:
-            if comment.get('message') and comment['message'].startswith('Helper'):
-                message = comment['message'] + f'{user.message_response_helper.format(LINK_GIF=comment["link"])}'
-            else:
-                message = f'{user.message_response_gif_download.format(FRAME_START=comment["frame_start"], FRAME_END=comment["frame_end"], LINK=comment["link"])}'
+            # Mensagem padrão para GIF download
+            message = user.message_response_gif_download.format(
+                FRAME_START=comment["frame_start"], 
+                FRAME_END=comment["frame_end"], 
+                LINK=comment["link"]
+            )
 
+        # Dados para a requisição
         dados = {
             'message': message,
             'access_token': data.FB_TOKEN
         }
         if comment.get('foto_id'):
             dados['attachment_id'] = comment['foto_id']
-            
-        response = httpx.post(f'{data.fb_url}/{comment["id"]}/comments', data=dados, timeout=20)
-        
+
+        # Envio da requisição ao Facebook
+        response = httpx.post(
+            f'{data.fb_url}/{comment["id"]}/comments', 
+            data=dados, 
+            timeout=20
+        )
+
+        # Verifica a resposta
         if response.status_code == 200:
             id = response.json().get('id')
             if id:
                 comment['response_id'] = id
                 break
         else:
-            print('erro ao postar a imagem pro fb', response.status_code, response.text)
+            print('Erro ao postar a imagem pro FB:', response.status_code, response.text)
             retries += 1
             time.sleep(3)

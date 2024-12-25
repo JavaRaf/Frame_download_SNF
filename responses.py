@@ -9,17 +9,18 @@ from subtitle import subtitle
 
 def response(comment: dict) -> None:
 
-    if (comment.get('file_path') and comment.get('id')) or (comment.get('message', '').lower() == user.str_command_help.lower()):
+    if (comment.get('file_path') and comment.get('id')) or \
+   (comment.get('message', '').lower() == user.str_command_help.lower()) or \
+   (comment.get('message', '').replace(' ', '').lower() == user.str_command_vote):
+        print("Checking condition...")
 
-        if user.str_command_gif.lower() in comment.get('comment', '').lower():
-            run_make_gif(comment)
-        
-        if user.str_command_download.lower() in comment.get('comment', '').lower():
-            subtitle(comment)
-            imgBB(comment)
-        
-        
-        post_fb(comment)
-        publish_fb(comment)
-        save_id(comment, 'Comentário respondido e id salvo: ')
+    if user.str_command_gif.lower() in comment.get('comment', '').lower():
+        run_make_gif(comment)
+    if user.str_command_download.lower() in comment.get('comment', '').lower():
+        subtitle(comment)
+        imgBB(comment)
+
+    post_fb(comment)
+    publish_fb(comment)
+    save_id(comment, 'Comentário respondido e id salvo: ')
 
