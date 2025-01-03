@@ -1,0 +1,48 @@
+
+# information to find the frames
+repo_owner:     'JavaRaf'     # your github username
+repo:           "FRIEREN-FIO" # repository where frames are saved
+branch:         "master"      # branch where frames are saved
+frames_folder:  "frames"      # directory where frames are saved
+
+#----------------------------------------------------------------
+#----------------------------------------------------------------
+# Your page_name should exactly match with your current page name
+# used to check if your token is valid
+
+facebook_page_name: "Todo Sabado a mesma imagem da Hotaru"
+#----------------------------------------------------------------
+#----------------------------------------------------------------
+
+# Commands available
+downlad:    "!dl"   # command to download frame
+gif:        "!gif"  # command to create gif
+help:       "!help" # command to show help
+vote:       "!vote" # command to vote on frame of the year
+
+#----------------------------------------------------------------
+#----------------------------------------------------------------
+
+# Facebook API Version. Update in deprecation case
+# versions docs: https://developers.facebook.com/docs/graph-api/changelog
+facebook_api_version: "v21.0"
+
+#----------------------------------------------------------------
+#----------------------------------------------------------------
+
+help_message: |
+    "\n\n"
+    "!dl - Download current frame.\n"
+    "\t!dl -f FRAME - Download specified frame.\n"
+    "\t!dl -t TEXT - Add text to frame before download.\n\n"
+    "!gif - Create GIF from next 30 frames.\n"
+    "\t!gif -f FRAME - Create GIF from specified frame.\n\n"
+    "!help - Show this message.\n\n"
+    "{LINK_GIF}."
+  
+vote_message: |
+    you voted for the frame {FRAME}, thanks for the vote
+
+
+
+
