@@ -34,7 +34,7 @@ def get_messages_and_ids(response_data) -> list[dict]:
 def get_comments() -> list[dict]:
     """Returns a list[dict] of comments from the specified Facebook page"""
 
-    retries, max_retries, messages_and_ids = 0, 5, []
+    retries, max_retries, messages_and_ids = 0, 6, []
     params = {'fields': 'comments.limit(100)', 'limit': '100', 'access_token': data.FB_TOKEN}
 
     while retries < max_retries:
