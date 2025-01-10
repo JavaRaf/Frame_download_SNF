@@ -1,0 +1,16 @@
+# Link to your github repository, where your EFIO-BOT is running
+# https://github.com/repo_owner/repo_name or https://github.com/repo_owner/repo_name.git
+your_github_repo_url: "https://github.com/JavaRaf/FRIEREN-EFIO.git"
+
+
+# Commands available and their aliases
+# Do not delete the commands, if you prefer another name, add it to the list below
+commands:
+  - ["!dl", "!download"]
+  - ["!gif", "!g"]
+  - ["!vote", "!v"]
+  - ["!help", "!h"]
+
+
+
+

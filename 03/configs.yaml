@@ -1,0 +1,18 @@
+
+repo_owner: 'JavaRaf'
+repo:       'FRIEREN-FIO'
+branch:     'master'
+frames:     'frames'
+
+
+
+commands:
+  - '!dl'
+  - '!gif'
+  - '!vote'
+  - '!help'
+
+
+
+
+

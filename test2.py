@@ -30,50 +30,12 @@ def main():
     :return: None
     """
     new_comment_ids = []
-    commands = configs["commands"]
-
-    switcher = {
-        "!dl":   [images.download_frames, subtitles.add_subtitle, messages.add_download_message],
-        "!gif":  [images.download_frames, subtitles.add_subtitle, commands.compile_gif, messages.add_gif_message],
-        "!vote": [commands.increment_vote, messages.add_vote_message],
-    }
+    commands = yaml_configs.get("commands")
 
     for person in data_persons:
         commands_list.check_command(commands, person)
-
-        if person.command not in switcher:
-            messages.help_message(person)
-
-        for func in switcher[person.command]:   
-            func(person)
-        
-        images.upload(person)
-        facebook.send(person)
-        new_comment_ids.append(person.comment_id)
+        images.download_frames(person)
+        subtitles.add_subtitle(person)
 
 
-    if len(new_comment_ids) > 0:
-        print(f"New comment replieds: {new_comment_ids}")
-        configs.save_ids(new_comment_ids)
-        
-    
-
-
-if __name__ == "__main__":
-    start = time()
-    while (time() - start) < (180 * 60):  # 3 hours
-        main()
-        print("Sleeping for 50 seconds...\n")
-        sleep(50)
-
-
-
-
-
-
-
-
-
-
-
-
+main()
