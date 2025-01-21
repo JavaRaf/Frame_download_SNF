@@ -13,7 +13,7 @@ def main():
 
     get_id() # get page id
     if os.environ.get('PAGE_ID') == None: # if page id is not specified then exit with error
-        print('Failed to get page id: No page ID found or wrong page ID')
+        print('Failed to get page id: No page ID found or wrong page ID', flush=True)
         os.sys.exit(1)
     
     comments_list: list[dict] = get_comments()
@@ -31,6 +31,6 @@ if __name__ == '__main__':
     start: float = time.time()
     while (time.time() - start) < (180 * 60):  # 3 hours
         main()
-        print('Sleeping for 50 seconds...\n')
+        print('Sleeping for 50 seconds...\n', flush=True)
         time.sleep(50)
         
