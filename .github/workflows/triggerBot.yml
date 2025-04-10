@@ -2,8 +2,8 @@ name: Trigger Bot
 
 on:
   workflow_dispatch:
-  #schedule:
-    #- cron: "0 */3 * * *"
+  schedule:
+    - cron: "0 */3 * * *"
 
 permissions:
   contents: write
@@ -42,10 +42,23 @@ jobs:
           python-version: 3.13
           architecture: x64 
 
+      - name: Is it already running?
+        run: |
+          WORKFLOW_NAME="${{ github.workflow }}"
+          RUN_COUNT=$(gh run list --status=in_progress --json name |
+            jq "[.[] | select(.name == \"$WORKFLOW_NAME\")] | length")
+
+          if [ "$RUN_COUNT" -gt 1 ]; then
+            echo "The workflow is already running, so we are not going to start it again"
+            exit 0
+          else
+            echo "The workflow is not running, so we are going to start it"
+          fi
+        
       - name: Upgrade pip to latest stable
         run: |
           python -m pip install --upgrade pip
-
+        
       - name: Install dependencies
         run: |
           python -m pip install -r requirements.txt
