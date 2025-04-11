@@ -66,6 +66,12 @@ jobs:
       - name: Run Python script
         run: python main.py
 
+      - name: Sync with remote to avoid diverging history
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase
+      
       - name: Update replyed_ids.txt
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
@@ -75,46 +81,57 @@ jobs:
 
       - name: Activate the workflow
         run: |
-            REPO="${{ github.repository }}"
-            BRANCH_NAME="${{ github.ref_name }}"
-
-            echo "Repository: $REPO"
-            echo "Branch Name: $BRANCH_NAME"
-
-            # Recuperar o workflow_id do único workflow no repositório
-            WORKFLOW_DATA=$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          set -e
+      
+          REPO="${{ github.repository }}"
+          BRANCH_NAME="${{ github.ref_name }}"
+          TOKEN="${{ secrets.GITHUB_TOKEN }}"
+          API_URL="https://api.github.com/repos/$REPO/actions"
+      
+          echo "Repository: $REPO"
+          echo "Branch Name: $BRANCH_NAME"
+      
+          # Verifica se o 'jq' está disponível
+          if ! command -v jq &> /dev/null; then
+            echo "Erro: 'jq' não está instalado. Instale para continuar."
+            exit 1
+          fi
+      
+          # Função para obter o ID do primeiro workflow
+          get_workflow_id() {
+            curl -s -H "Authorization: Bearer $TOKEN" \
+                  -H "Accept: application/vnd.github.v3+json" \
+                  "$API_URL/workflows" | jq -r '.workflows[0].id'
+          }
+      
+          # Função para disparar o workflow
+          trigger_workflow() {
+            curl -s -o response_body.txt -w "%{http_code}" -X POST \
+              -H "Authorization: Bearer $TOKEN" \
               -H "Accept: application/vnd.github.v3+json" \
-              https://api.github.com/repos/$REPO/actions/workflows)
-            echo "Workflow Data: $WORKFLOW_DATA"
-
-            WORKFLOW_ID=$(echo "$WORKFLOW_DATA" | jq -r '.workflows[0].id')
-            echo "Workflow ID: $WORKFLOW_ID"
-
-            retries=0
-            max_retries=3
-
-            while [[ $retries -lt $max_retries ]]; do
-              response=$(curl -o response_body.txt -s -w "%{http_code}" -X POST \
-                -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-                -H "Accept: application/vnd.github.v3+json" \
-                -d "{\"ref\":\"$BRANCH_NAME\"}" \
-                "https://api.github.com/repos/$REPO/actions/workflows/$WORKFLOW_ID/dispatches")
-
-              echo "HTTP Response Code: $response"
-              echo "HTTP Response Body:"
-              cat response_body.txt
-
-              if [[ $response -ge 200 && $response -lt 300 ]]; then
-                echo "Workflow triggered successfully!"
-                exit 0
-              else
-                echo "Error when triggering workflow (attempt $((retries + 1))/$max_retries)"
-                retries=$((retries + 1))
-                sleep 5
-              fi
-            done
-
-            if [[ $retries -eq $max_retries ]]; then
-              echo "Failed to trigger workflow after $max_retries attempts."
-              exit 1
+              -d "{\"ref\":\"$BRANCH_NAME\"}" \
+              "$API_URL/workflows/$1/dispatches"
+          }
+      
+          WORKFLOW_ID=$(get_workflow_id)
+          echo "Workflow ID: $WORKFLOW_ID"
+      
+          # Tentar disparar o workflow com até 3 tentativas
+          max_retries=3
+          for attempt in $(seq 1 $max_retries); do
+            response=$(trigger_workflow "$WORKFLOW_ID")
+            echo "Tentativa $attempt: HTTP $response"
+            cat response_body.txt
+      
+            if [[ $response -ge 200 && $response -lt 300 ]]; then
+              echo "Workflow triggered successfully!"
+              exit 0
+            else
+              echo "Erro ao disparar o workflow. Nova tentativa em 5 segundos..."
+              sleep 5
             fi
+          done
+      
+          echo "Falha ao disparar o workflow após $max_retries tentativas."
+          exit 1
+      
