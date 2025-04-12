@@ -1,36 +1,40 @@
-from page_id import get_id 
-from comments import get_comments
-from get_img import get_img
-from finder import finder_commands
-from responses import response
-from save_ids import remove_replyed_ids
+import os
 import time
-import os 
+
+from dotenv import load_dotenv; load_dotenv(override=False)
+
+from src.comments import get_fb_posts, person_data
+from src.save_ids import remove_seen_comments
+
 
 
 
 def main():
 
-    get_id() # get page id
-    if os.environ.get('PAGE_ID') == None: # if page id is not specified then exit with error
-        print('Failed to get page id: No page ID found or wrong page ID', flush=True)
-        os.sys.exit(1)
+    if os.getenv("FB_TOKEN") is None:
+        raise ValueError("FB_TOKEN not defined.")
+
+    posts = get_fb_posts(max_attempts=2)  # Gets 200 comments (2 attempts)
+    persons = person_data(posts)  # Creates Person objects for each comment
+    persons = remove_seen_comments(persons)
+
+    posts = get_fb_posts(max_attempts=2)  # Gets 200 comments (2 attempts)
+    persons = remove_seen_comments(person_data(posts))  # get person objects for each comment, filter seen_ids
     
-    comments_list: list[dict] = get_comments()
-    remove_replyed_ids(comments_list) # remove comments with id in replyed_ids.txt
-    
-    if comments_list is not None:
-        for comment in comments_list:
-            finder_commands(comment)
-            get_img(comment)
-            response(comment)
-        
-        
+
+
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
+
     start: float = time.time()
     while (time.time() - start) < (180 * 60):  # 3 hours
         main()
-        print('Sleeping for 50 seconds...\n', flush=True)
-        time.sleep(50)
-        
+        print('Sleeping for 60 seconds...\n', flush=True)
+        time.sleep(60)

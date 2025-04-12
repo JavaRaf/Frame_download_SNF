@@ -19,7 +19,7 @@ def remove_replyed_ids(comments_list: list) -> None:
             replyed_ids = set(file.read().splitlines())  # usando set para busca mais eficiente
             
             comments_list[:] = [comment for comment in comments_list 
-                              if comment.get('id') not in replyed_ids]
+                if comment.get('id') not in replyed_ids]
     
     except FileNotFoundError:
         with open('replyed_ids.txt', 'w', encoding='utf-8') as file:
