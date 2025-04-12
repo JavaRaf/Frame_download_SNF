@@ -1,38 +1,33 @@
 import os
 import time
 
-from dotenv import load_dotenv; load_dotenv(override=False)
+from dotenv import load_dotenv
+from src.comments import Person, process_comments
 
-from src.comments import get_fb_posts, person_data
-from src.save_ids import remove_seen_comments
+load_dotenv(override=False)
 
 
+
+
+def check_command(person: Person) -> None:
+    pass
 
 
 def main():
-
     if os.getenv("FB_TOKEN") is None:
         raise ValueError("FB_TOKEN not defined.")
 
-    posts = get_fb_posts(max_attempts=2)  # Gets 200 comments (2 attempts)
-    persons = person_data(posts)  # Creates Person objects for each comment
-    persons = remove_seen_comments(persons)
-
-    posts = get_fb_posts(max_attempts=2)  # Gets 200 comments (2 attempts)
-    persons = remove_seen_comments(person_data(posts))  # get person objects for each comment, filter seen_ids
+    persons: list[Person] = process_comments() # you can pass fb_version and max_attempts
     
-
-
-
-
-
-
-
-
+    if not persons:
+        print("no comments to process.", flush=True)
+        return
+    
+    for person in persons:
+        print(person, '\r\n')
 
 
 if __name__ == '__main__':
-
     start: float = time.time()
     while (time.time() - start) < (180 * 60):  # 3 hours
         main()

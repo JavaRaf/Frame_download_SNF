@@ -1,0 +1,33 @@
+
+
+
+
+
+
+
+download_command:
+  - '!dl'
+  - '!d'
+  - '!download'
+  - '!download_frame'
+
+gif_command:
+  - '!gif'
+  - '!g'
+  - '!create_gif'
+
+help_command:
+  - '!help'
+  - '!h'
+  - '!?'
+
+
+
+  
+
+  
+
+
+  
+
+  
