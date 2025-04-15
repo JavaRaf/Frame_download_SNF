@@ -21,3 +21,4 @@ class Person:
     season: Optional[int] = field(default=None)
     episode: Optional[int] = field(default=None)
     frame: Optional[int] = field(default=None)
+    frame_subtitle: Optional[str] = field(default=None)

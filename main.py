@@ -3,14 +3,11 @@ import time
 
 from dotenv import load_dotenv
 from src.comments import Person, process_comments
+from src.load_configs import load_configs
 
 load_dotenv(override=False)
+configs = load_configs()
 
-
-
-
-def check_command(person: Person) -> None:
-    pass
 
 
 def main():
@@ -24,7 +21,9 @@ def main():
         return
     
     for person in persons:
-        print(person, '\r\n')
+        pass
+    
+
 
 
 if __name__ == '__main__':

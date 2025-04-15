@@ -1,16 +1,33 @@
 import os
 
+import re
+import time
+
 import httpx
 from httpx import Client, Timeout
-from retry import retry
-import time
-import re
 
-from src.save_ids import remove_seen_comments
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_exponential
+)
+
 from src.person_class import Person
+from src.save_ids import remove_seen_comments
 
 
-def is_person_comment_filtered(person: Person) -> bool:
+def find_frame_subtitle(personComment: str) -> str:
+    """
+    Extracts the frame subtitle from the person's comment.
+    The frame subtitle is expected to be present after the "-t" prefix in the comment.
+    """
+    match = re.search(r"-t", personComment)
+    if not match:
+        return None
+    
+    return personComment[match.end():].strip()
+  
+def is_person_comment_filtered(personComment: str) -> bool:
     """
     Checks if the person's comment contains one of the filtered prefixes.
     """
@@ -19,7 +36,7 @@ def is_person_comment_filtered(person: Person) -> bool:
         "Subtitles:",
         "𝑺𝒖𝒃𝒕𝒊𝒕𝒍𝒆𝒔:",
     ]
-    return person.comment and person.comment.startswith(tuple(filtered_prefixes))
+    return personComment.startswith(tuple(filtered_prefixes))
 
 def process_post_message(persons: list[Person]) -> list[Person]:
     """
@@ -49,14 +66,19 @@ def process_post_message(persons: list[Person]) -> list[Person]:
 
 def person_data(posts: list) -> list[Person]:
     """
-    Extracts relevant comment data from a list of posts.
+    Processes a list of posts to extract relevant comment data and create Person objects.
 
-    This function processes a list of posts and extracts the following information:
+    This function iterates through a list of posts, extracting information about the post,
+    the author of the comments, and the comments themselves. It creates a list of Person
+    objects containing the following information:
+    - post_message: The message of the post.
+    - post_id: The ID of the post.
     - person_name: The name of the person who made the comment.
     - person_id: The ID of the person who made the comment.
     - comment: The comment message.
     - comment_id: The ID of the comment.
     - created_time: The time the comment was created.
+    - frame_subtitle: The frame subtitle extracted from the comment (if present).
 
     Args:
         posts (list): A list of posts from the Facebook Graph API.
@@ -74,20 +96,24 @@ def person_data(posts: list) -> list[Person]:
                     post_message=post.get('message'),           # post info
                     post_id=post.get('id'),                     # post info
 
-                    person_name=author.get('name'),             # comments info
-                    person_id=author.get('id'),                 # comments info
-                    comment=comment.get('message'),             # comments info 
-                    comment_id=comment.get('id'),               # comments info
-                    created_time=comment.get('created_time'),   # comments info
+                    person_name=author.get('name'),             # author info
+                    person_id=author.get('id'),                 # author info
+
+                    comment=comment.get('message'),                             # comment info
+                    comment_id=comment.get('id'),                               # comment info
+                    created_time=comment.get('created_time'),                   # comment info
+                    frame_subtitle=find_frame_subtitle(comment.get('message')), # comment info
                 )
-                if not is_person_comment_filtered(person):
+
+                if not is_person_comment_filtered(person.comment):
                     persons.append(person)
+
             except Exception as e:
-                print(f"Erro ao processar comentário: {e}")
+                print(f"Error processing comment: {e}")
                 continue
     return persons
 
-@retry(tries=2, delay=2, max_delay=10, backoff=2)
+@retry(stop=stop_after_attempt(2), wait=wait_exponential(multiplier=2, min=1, max=10))
 def get_fb_posts(fb_version: str = "v21.0", max_attempts: int = 6) -> list:
     """
     Fetches the latest posts from a Facebook page using the specified Facebook Graph API version.
@@ -132,11 +158,17 @@ def get_fb_posts(fb_version: str = "v21.0", max_attempts: int = 6) -> list:
 
                 params = None
 
+                time.sleep(SLEEP_TIME)
+
             except httpx.RequestError as e:
                 print(f"Erro na requisição HTTP: {str(e)}", flush=True)
+                time.sleep(SLEEP_TIME)
+                continue
+
             except Exception as e:
                 print(f"Erro inesperado: {str(e)}", flush=True)
-            time.sleep(SLEEP_TIME)
+                time.sleep(SLEEP_TIME)
+                continue
     
     return posts_data
 
